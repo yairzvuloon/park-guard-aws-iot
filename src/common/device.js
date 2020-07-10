@@ -1,6 +1,9 @@
 const awsIot = require("aws-iot-device-sdk");
 const path = require("path");
 
+//you need to create certs folder in the project root
+//and keep your aws keys in
+
 const awsIotKeysPath = path.resolve("certs/");
 const privateKey = "private.pem.key";
 const certName = "certificate.pem.crt";
@@ -18,12 +21,27 @@ const device = awsIot.device({
   host: "a2kg0qb424gtrj-ats.iot.eu-west-1.amazonaws.com",
 });
 
-device.on("connect", function () {
-  console.log("connect");
-  device.subscribe("topic_1");
-  device.publish("topic_2", JSON.stringify({ test_data: 1 }));
-});
+//device.on("report", function () {
+console.log("report");
+//device.subscribe("topic_1");
+try {
+  device.publish(
+    "ParkGuard/1",
+    JSON.stringify({
+      isBlocked: false,
+      license_number: 9650678,
+      picture: "",
+      start_time: "2020-05-30-19-39-07",
+      end_time: "2020-05-30-19-39-14",
+    })
+  );
+} catch (error) {
+  console.log(error);
+}
 
-device.on("message", function (topic, payload) {
-  console.log("message", topic, payload.toString());
-});
+console.log("done ");
+//});
+
+// device.on("message", function (topic, payload) {
+//   console.log("message", topic, payload.toString());
+// });

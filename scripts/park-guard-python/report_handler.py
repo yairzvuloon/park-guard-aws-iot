@@ -4,6 +4,7 @@ from subprocess import check_output
 import base64
 import cv2
 from pprint import pprint
+import sys
 
 
 def handle_report(trackableObject, frame):
@@ -39,5 +40,5 @@ def post_report(jsonData):
     json_string = json.dumps(jsonData)
     json_string = json_string.replace(" ", "")
     print(json_string)
-    out = check_output(["./putReport.sh", json_string])
-    print("[INFO] {}".format(out))
+    # out = check_output(["./sendReport.sh", "hi"])
+    # print("[INFO] {}".format(out))

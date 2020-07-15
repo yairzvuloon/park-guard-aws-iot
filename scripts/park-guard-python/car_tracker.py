@@ -26,14 +26,18 @@ def crop_frame(inputBoundingBox, inputFrame):
     # crop car out of frame
     startCropY = inputBoundingBox[1] if inputBoundingBox[1] > 0 else 0
     startCropX = inputBoundingBox[0] if inputBoundingBox[0] > 0 else 0
-    crop = inputFrame[startCropY:inputBoundingBox[3], startCropX:inputBoundingBox[2]]
+    crop = inputFrame[startCropY:inputBoundingBox[3],
+                      startCropX:inputBoundingBox[2]]
     return crop
 
 
 def draw_lines(leftToRightLine, rightToLeftLine, horizontalLine, frame, frameHeight, frameWidth):
-    cv2.line(frame, (leftToRightLine, 0), (leftToRightLine, frameHeight), (0, 255, 255), 2)
-    cv2.line(frame, (rightToLeftLine, 0), (rightToLeftLine, frameHeight), (0, 255, 255), 2)
-    cv2.line(frame, (0, horizontalLine), (frameWidth, horizontalLine), (0, 255, 255), 2)
+    cv2.line(frame, (leftToRightLine, 0),
+             (leftToRightLine, frameHeight), (0, 255, 255), 2)
+    cv2.line(frame, (rightToLeftLine, 0),
+             (rightToLeftLine, frameHeight), (0, 255, 255), 2)
+    cv2.line(frame, (0, horizontalLine),
+             (frameWidth, horizontalLine), (0, 255, 255), 2)
 
 
 def has_moved(centroids, movementThreshold, centroid):
@@ -49,7 +53,8 @@ def has_moved(centroids, movementThreshold, centroid):
 
 def get_license_plate_number(plateInput):
     currentLicenseNumber = plateInput['licenseNumber']
-    croppedFrame = crop_frame(inputFrame=plateInput['frame'], inputBoundingBox=plateInput['boundingBox'])
+    croppedFrame = crop_frame(
+        inputFrame=plateInput['frame'], inputBoundingBox=plateInput['boundingBox'])
     licenseeNumber = handle_plate_identifier(
         croppedFrame=croppedFrame, accessToken=conf["plate_recogniser_token"],
         objectID=plateInput['objectID'], score=conf["recogniser_score"],
@@ -70,7 +75,8 @@ def handle_license_plates_in_frame(plateInputs, trackableObjectsList, frameCount
 def stop_alarm_for_dissappeared_object(inputAlarmThread, inputObjectsList):
     if inputAlarmThread.objectID is not None and inputAlarmThread.stopped is False:
         if inputAlarmThread.objectID not in inputObjectsList:
-            print("[INFO] stopped alarm for disappeared object ID {}".format(inputAlarmThread.objectID))
+            print("[INFO] stopped alarm for disappeared object ID {}".format(
+                inputAlarmThread.objectID))
             inputAlarmThread.stop()
 
 
@@ -154,9 +160,13 @@ def build_bounding_box_list_from_trackers_list(trackers, rgb):
 
 
 def calculate_zone_boundaries(H, W, lines_offset_conf):
-    LeftToRightLine = W // conf["left_to_right_line"] + lines_offset_conf["left_vertical_offset"]
-    RightToLeftLine = W - W // conf["left_to_right_line"] + lines_offset_conf["right_vertical_offset"]
-    HorizontalLine = H // conf["horizontal_line"] + lines_offset_conf["horizontal_offset"]
+    LeftToRightLine = W // conf["left_to_right_line"] + \
+        lines_offset_conf["left_vertical_offset"]
+    RightToLeftLine = W - \
+        W // conf["left_to_right_line"] + \
+        lines_offset_conf["right_vertical_offset"]
+    HorizontalLine = H // conf["horizontal_line"] + \
+        lines_offset_conf["horizontal_offset"]
 
     return LeftToRightLine, RightToLeftLine, HorizontalLine
 
@@ -166,8 +176,8 @@ def draw_information_on_object(currentFrame, centroid, objectID, currentTrackabl
     # object on the output frame
     text = "ID {} {:.2f} {}".format(objectID, currentTrackableObject.elapsedTime,
                                     currentTrackableObject.licenseNumber)
-    cv2.putText(currentFrame, text, (centroid[0] - 10, centroid[1] - 10)
-                , cv2.FONT_HERSHEY_SIMPLEX, 0.5, currentTrackableObject.markerColor, 2)
+    cv2.putText(currentFrame, text, (centroid[0] - 10, centroid[1] - 10),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.5, currentTrackableObject.markerColor, 2)
     cv2.circle(currentFrame, (centroid[0], centroid[1]), 4,
                currentTrackableObject.markerColor, -1)
     # draw rectangle around object
@@ -296,7 +306,8 @@ def initialize_video_stream():
 def run_program():
     # load our serialized model from disk
     print("[INFO] loading model...")
-    network = cv2.dnn.readNetFromCaffe(conf["prototxt_path"], conf["model_path"])
+    network = cv2.dnn.readNetFromCaffe(
+        conf["prototxt_path"], conf["model_path"])
     # network.setPreferableTarget(cv2.dnn.DNN_TARGET_MYRIAD)
 
     videoStream = initialize_video_stream()
@@ -351,28 +362,34 @@ def run_program():
         # check to see if we should run a more computationally expensive
         # object detection method to aid our tracker
         if totalFrames % conf["track_object"] == 0:
-            detections = obtain_detections_in_frame(frame=currentFrame, network=network)
-            trackers = build_trackers_list_from_detections(detections, rgb, H, W)
+            detections = obtain_detections_in_frame(
+                frame=currentFrame, network=network)
+            trackers = build_trackers_list_from_detections(
+                detections, rgb, H, W)
 
         # otherwise, we should utilize our object *trackers* rather than
         # object *detectors* to obtain a higher frame processing
         # throughput
         else:
-            boundingBoxes = build_bounding_box_list_from_trackers_list(trackers, rgb)
+            boundingBoxes = build_bounding_box_list_from_trackers_list(
+                trackers, rgb)
 
         # save clean original frame before drawing on it
         cleanFrame = currentFrame.copy()
         # draw 2 vertical lines and one horizontal line in the frame -- once an
         # object crosses these lines we will start the timers
-        (LeftToRightLine, RightToLeftLine, HorizontalLine) = calculate_zone_boundaries(H, W, lines_offset_conf)
-        draw_lines(LeftToRightLine, RightToLeftLine, HorizontalLine, currentFrame, H, W)
+        (LeftToRightLine, RightToLeftLine, HorizontalLine) = calculate_zone_boundaries(
+            H, W, lines_offset_conf)
+        draw_lines(LeftToRightLine, RightToLeftLine,
+                   HorizontalLine, currentFrame, H, W)
 
         # use the centroid tracker to associate the (1) old object
         # centroids with (2) the newly computed object centroids
         objects = centroidTracker.update(boundingBoxes)
         # loop over the tracked objects
         for (objectID, centroid) in objects.items():
-            trackingBoundingBox = centroidTracker.objectsToBoundingBoxes[centroid.tostring()]
+            trackingBoundingBox = centroidTracker.objectsToBoundingBoxes[centroid.tostring(
+            )]
             # check to see if a trackable object exists for the current
             # object ID
             currentTrackableObject = trackableObjects.get(objectID, None)
@@ -392,7 +409,8 @@ def run_program():
 
             # store the trackable object in our dictionary
             trackableObjects[objectID] = currentTrackableObject
-            draw_information_on_object(currentFrame, centroid, objectID, currentTrackableObject, trackingBoundingBox)
+            draw_information_on_object(
+                currentFrame, centroid, objectID, currentTrackableObject, trackingBoundingBox)
 
         if not display_frame(currentFrame):
             break
@@ -402,10 +420,12 @@ def run_program():
         totalFrames += 1
         fps.update()
 
-        stop_alarm_for_dissappeared_object(inputAlarmThread=alarmThread, inputObjectsList=centroidTracker.objects)
+        stop_alarm_for_dissappeared_object(
+            inputAlarmThread=alarmThread, inputObjectsList=centroidTracker.objects)
 
         # handle plate recognition from data collected earlier and assign it to an object
-        handle_license_plates_in_frame(licenseNumberInputs, trackableObjects, totalFrames)
+        handle_license_plates_in_frame(
+            licenseNumberInputs, trackableObjects, totalFrames)
 
     end_program(fps, videoStream, alarmThread)
 

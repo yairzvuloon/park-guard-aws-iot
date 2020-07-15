@@ -1,15 +1,22 @@
-const { spawn } = require("child_process");
+const { PythonShell } = require("python-shell");
 
-ls = spawn("bash", ["./scripts/park-guard-python/run.sh"]);
+process.chdir("./scripts/park-guard-python");
 
-ls.stdout.on("data", (data) =>
-  data.toString().includes("[INFO]")
-    ? null
-    : console.log("stdout: " + data.toString())
+let shell = PythonShell.run(
+  "car_tracker.py",
+  {
+    pythonOptions: ["-u"],
+    mode: "text",
+    args: [
+      "-c",
+      "./config/config.json",
+      "-l",
+      "./config/lines_offset_config.json",
+    ],
+  },
+  (err) => console.log(err)
 );
 
-// ls.stderr.on("data", (data) => console.log("stderr: " + data.toString()));
-
-ls.on("exit", (code) =>
-  console.log("child process exited with code " + code.toString())
-);
+shell.on("message", (message) => {
+  message.includes("[INFO]") ? null : console.log(message);
+});

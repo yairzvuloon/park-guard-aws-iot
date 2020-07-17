@@ -48,7 +48,7 @@
   // number of frames to skip before starting plate recogniser
   //starts with 1!!!
   // for virtual box
-  "plate_recogniser_skip": 50,
+  //"plate_recogniser_skip": 50,
   // for linux pc
   "plate_recogniser_skip": 5,
   // for raspberry pi:

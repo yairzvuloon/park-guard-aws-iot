@@ -19,5 +19,6 @@ let shell = PythonShell.run(
 );
 
 shell.on("message", (message) => {
-  message.includes("[INFO]") ? null : sendReport(message);
+ console.log(message);
+ message.includes("[INFO]") ? null : sendReport(message);
 });

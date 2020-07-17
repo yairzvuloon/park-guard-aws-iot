@@ -43,11 +43,11 @@
 	"use__plate_recogniser": true,
 	"plate_recogniser_token": "c3d2f17525534db96299d25bd0d1ea1a6b84b2dd",
 	"plate_regions": ["il"],
-	"recogniser_score": 0.75,
+	"recogniser_score": 0.65,
 
 	// number of frames to skip before starting plate recogniser
 	//starts with 1!!!
-	"plate_recogniser_skip": 50,
+	"plate_recogniser_skip": 20,
 
 	// flag used to check if sound alarm and upload report features are enabled
 	"enable_alarm": true,
@@ -64,6 +64,6 @@
 
 	// flag used to enable reading from video instead of camera stream
 	// path to video source
-	"read_from_video": true,
-	"video_source": "sample_data/IMG_3370.MOV"
+	"read_from_video": false,
+	"video_source": "sample_data/IMG_3370.mp4"
 }

@@ -1,69 +1,74 @@
 {
-	// maximum consecutive frames a given object is allowed to be
-	// marked as "disappeared" until we need to deregister the object
-	// from tracking
-	"max_disappear": 10,
+  // maximum consecutive frames a given object is allowed to be
+  // marked as "disappeared" until we need to deregister the object
+  // from tracking
+  "max_disappear": 10,
 
-	// maximum distance between centroids to associate an object --
-	// if the distance is larger than this maximum distance we'll
-	// start to mark the object as "disappeared"
-	"max_distance": 175,
+  // maximum distance between centroids to associate an object --
+  // if the distance is larger than this maximum distance we'll
+  // start to mark the object as "disappeared"
+  "max_distance": 175,
 
-	// number of frames to perform object tracking instead of object
-	// detection
-	"track_object": 4,
+  // number of frames to perform object tracking instead of object
+  // detection
+  "track_object": 4,
 
-	// minimum confidence
-	"confidence": 0.4,
+  // minimum confidence
+  "confidence": 0.4,
 
-	// frame width in pixels
-	"frame_width": 400,
+  // frame width in pixels
+  "frame_width": 400,
 
-	// real world distance in meters
-	// (not sure if we need this!!!)
-	"distance": 16,
-	
-	//time limit for stopping in illegal zone in seconds
-	"time_limit": 10,
+  // real world distance in meters
+  // (not sure if we need this!!!)
+  "distance": 16,
 
-	// movement threshold 50
-	"movement_threshold": 50,
+  //time limit for stopping in illegal zone in seconds
+  "time_limit": 10,
 
-	// flag indicating if the frame must be displayed
-	"display": true,
+  // movement threshold 50
+  "movement_threshold": 50,
 
-	// path the object detection model
-	"model_path": "MobileNetSSD_deploy.caffemodel",
+  // flag indicating if the frame must be displayed
+  "display": true,
 
-	// path to the prototxt file of the object detection model
-	"prototxt_path": "MobileNetSSD_deploy.prototxt",
+  // path the object detection model
+  "model_path": "MobileNetSSD_deploy.caffemodel",
 
-	// flag used to check if plate recodniser is to be used and plate recogniser access
-	// token
-	"use__plate_recogniser": true,
-	"plate_recogniser_token": "c3d2f17525534db96299d25bd0d1ea1a6b84b2dd",
-	"plate_regions": ["il"],
-	"recogniser_score": 0.65,
+  // path to the prototxt file of the object detection model
+  "prototxt_path": "MobileNetSSD_deploy.prototxt",
 
-	// number of frames to skip before starting plate recogniser
-	//starts with 1!!!
-	"plate_recogniser_skip": 20,
+  // flag used to check if plate recodniser is to be used and plate recogniser access
+  // token
+  "use__plate_recogniser": true,
+  "plate_recogniser_token": "c3d2f17525534db96299d25bd0d1ea1a6b84b2dd",
+  "plate_regions": ["il"],
+  "recogniser_score": 0.65,
 
-	// flag used to check if sound alarm and upload report features are enabled
-	"enable_alarm": true,
-	"alarm_source": "alarm/alarm1.mp3",
-	"upload_report": true,
-	"upload_clean_frame": false,
+  // number of frames to skip before starting plate recogniser
+  //starts with 1!!!
+  // for virtual box
+  "plate_recogniser_skip": 50,
+  // for linux pc
+  "plate_recogniser_skip": 5,
+  // for raspberry pi:
+  //"plate_recogniser_skip": 20,
 
-	// output directory
-	"output_path": "output",
+  // flag used to check if sound alarm and upload report features are enabled
+  "enable_alarm": true,
+  "alarm_source": "alarm/alarm1.mp3",
+  "upload_report": true,
+  "upload_clean_frame": false,
 
-	//	line offsets
-	"left_to_right_line": 4,
-	"horizontal_line": 2,
+  // output directory
+  "output_path": "output",
 
-	// flag used to enable reading from video instead of camera stream
-	// path to video source
-	"read_from_video": false,
-	"video_source": "sample_data/IMG_3370.mp4"
+  //	line offsets
+  "left_to_right_line": 4,
+  "horizontal_line": 2,
+
+  // flag used to enable reading from video instead of camera stream
+  // path to video source
+  "read_from_video": true,
+  "video_source": "sample_data/IMG_3370.mp4"
 }

@@ -50,7 +50,7 @@
   // for virtual box
   //"plate_recogniser_skip": 50,
   // for linux pc
-  "plate_recogniser_skip": 5,
+  "plate_recogniser_skip": 10,
   // for raspberry pi:
   //"plate_recogniser_skip": 20,
 

@@ -22,6 +22,20 @@ class DeviceUtil {
       }
     );
 
+    // this._device.publish(
+    //   `$aws/things/${thingName}/shadow/update`,
+    //   JSON.stringify({
+    //     state: {
+    //       reported: {
+    //         isAllowed: true,
+    //       },
+    //     },
+    //   }),
+    //   (err, granted) => {
+    //     if (err) console.error(err);
+    //   }
+    // );
+
     this._device.on("message", (topic, payload) =>
       console.log("message", topic, payload.toString())
     );

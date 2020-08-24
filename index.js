@@ -28,11 +28,11 @@ const main = async () => {
 
   const device = new DeviceUtil({ thingName, host });
 
-  // runCarTracker();
-  // shell.on("message", (message) => {
-  //   console.log(message);
-  //   message.includes("[INFO]") ? null : device.sendReport(message);
-  // });
+  runCarTracker();
+  shell.on("message", (message) => {
+    console.log(message);
+    message.includes("[INFO]") ? null : device.sendReport(message);
+  });
   // try {
   //   const shadowUtil = new ShadowUtil("ParkGuard1", "client-1", true);
   //   shadowUtil.addDefaultListeners();

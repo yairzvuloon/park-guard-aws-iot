@@ -236,7 +236,12 @@ def check_and_handle_objects_location_in_frame(trackableObject, rightToLeftLine,
                 frameToUpload = cleanFrame if conf["upload_clean_frame"] else infoFrame
                 trackableObject.handle_time_passed(alarmThread=alarmThread, frame=frameToUpload,
                                                    isAlarmFeatureOn=conf["enable_alarm"],
-                                                   isReportFeatureOn=conf["upload_report"])
+                                                   isReportFeatureOn=conf["upload_report"],
+                                                   whiteList=get_white_list())
+
+
+def get_white_list():
+    return Conf(conf["white_list_json"])["list"]
 
 
 def display_frame(farme):

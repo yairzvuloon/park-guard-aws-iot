@@ -30,7 +30,8 @@ def build_report_json_data(trackableObject, base64ImageString):
         "license_number": trackableObject.licenseNumber if trackableObject.licenseNumber else "null",
         "picture": base64ImageString,
         "start_time": trackableObject.startEventDate,
-        "end_time": trackableObject.endEventDate if trackableObject.endEventDate else "null"
+        "end_time": trackableObject.endEventDate if trackableObject.endEventDate else "null",
+        "isApproved": trackableObject.isApproved
     }
 
     return jsonData

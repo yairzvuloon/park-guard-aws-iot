@@ -1,7 +1,7 @@
 # import the necessary packages
 from report_handler import handle_report
 from datetime import datetime
-
+from pyimagesearch.utils import Conf
 
 class TrackableObject:
     def __init__(self, objectID, centroid, licenseNumber=str()):
@@ -28,6 +28,8 @@ class TrackableObject:
         self.startEventDate = None
         self.endEventDate = None
 
+        self.isApproved = False
+
         self.blockFrame = None
 
     def handle_enter_illegal_zone(self, startTime):
@@ -36,16 +38,17 @@ class TrackableObject:
         self.markerColor = (0, 255, 255)
         print("[INFO] ID {} entered illegal zone".format(self.objectID))
 
-    def handle_time_passed(self, alarmThread, frame, isAlarmFeatureOn, isReportFeatureOn):
+    def handle_time_passed(self, alarmThread, frame, isAlarmFeatureOn, isReportFeatureOn, whiteList=[]):
         print("[INFO] ID {} passed permitted time in illegal zone".format(self.objectID))
         self.isBlocking = True
         self.markerColor = (255, 0, 0)
         self.startEventDate = datetime.today().strftime('%Y-%m-%d-%H-%M-%S')
         self.endEventDate = None
         self.blockFrame = frame
+        self.isApproved = self.is_in_white_list(whiteList)
         if isReportFeatureOn:
             handle_report(self, frame)
-        if isAlarmFeatureOn:
+        if isAlarmFeatureOn and not self.isApproved:
             self.alarmThread = alarmThread
             self.alarmThread.start(self.objectID)
 
@@ -62,3 +65,11 @@ class TrackableObject:
                 handle_report(self, self.blockFrame)
             if isAlarmFeatureOn and self.alarmThread:
                 self.alarmThread.stop()
+
+    def is_in_white_list(self, whiteList):
+        print(whiteList)
+        if self.licenseNumber and whiteList:
+            for approvedNumber in whiteList:
+                if self.licenseNumber == approvedNumber:
+                    return True
+        return False

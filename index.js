@@ -3,25 +3,39 @@ const { DeviceUtil } = require("./src/common/device.utils");
 const ShadowUtil = require("./src/common/shadow.utils");
 //const exec = util.promisify(require("child_process").exec);
 let shell;
+//script:
 
-const runCarTracker = () => {
+const scriptsNames = {
+  CAR_TRACKER: "car_tracker.py", STREAMER: "streamer.py"
+}
+
+const getArgs = (scriptName, isStream) => {
+  const requiredArgs = [
+    "-c",
+    "./config/config.json",
+    "-l",
+    "./config/lines_offset_config.json"
+  ]
+
+  if (scriptName === scriptsNames.CAR_TRACKER) return requiredArgs;
+
+  if (scriptName == scriptsNames.STREAMER)
+    return [...requiredArgs, "--stream", `${isStream}`]
+
+
+}
+
+const runCarTracker = (scriptName, isStream) => {
   process.chdir("./scripts/park-guard-python");
+
   shell = PythonShell.run(
-    "car_tracker.py",
-    // "streamer.py",
+    scriptName,
     {
       pythonOptions: ["-u"],
       mode: "text",
-      args: [
-        "-c",
-        "./config/config.json",
-        "-l",
-        "./config/lines_offset_config.json",
-        // "--stream",
-        // "true"
-      ],
+      args: getArgs(scriptName, isStream)
     },
-    (err) => console.log("car_tracker.py failed", { err })
+    (err) => err && console.log("the process child failed", { err })
   );
 };
 
@@ -31,7 +45,7 @@ const main = async () => {
 
   const device = new DeviceUtil({ thingName, host });
 
-  runCarTracker();
+  runCarTracker(scriptsNames.STREAMER, false);
   shell.on("message", (message) => {
     console.log(message);
     message.includes("[INFO]") ? null : device.sendReport(message);

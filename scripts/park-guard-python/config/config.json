@@ -72,5 +72,8 @@
   "read_from_video": true,
   "video_source": "sample_data/IMG_3370.mp4",
 
-  "white_list_json": "config/white_list.json"
+  //  white list json path
+  "white_list_json": "config/white_list.json",
+
+  "streaming_frequency": 2
 }

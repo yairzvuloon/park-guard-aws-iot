@@ -67,7 +67,6 @@ class TrackableObject:
                 self.alarmThread.stop()
 
     def is_in_white_list(self, whiteList):
-        print(whiteList)
         if self.licenseNumber and whiteList:
             for approvedNumber in whiteList:
                 if self.licenseNumber == approvedNumber:

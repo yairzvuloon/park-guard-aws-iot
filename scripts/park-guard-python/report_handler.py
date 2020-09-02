@@ -7,11 +7,16 @@ from pprint import pprint
 import sys
 
 
-def handle_report(trackableObject, frame):
+def handle_report(trackableObject, frame, isForStreaming=False, isStreaming=False):
     print("[INFO] creating report...")
     fileName = 'report.json'
     base64ImageString = encode_frame_to_base64(frame)
-    jsonData = build_report_json_data(trackableObject, base64ImageString)
+
+    if not isForStreaming:
+        jsonData = build_block_event_json_data(trackableObject, base64ImageString)
+    else:
+        jsonData = build_streaming_json_data(isStreaming, base64ImageString)
+
     post_report(jsonData)
 
 
@@ -24,7 +29,7 @@ def encode_frame_to_base64(frame):
     return encode_string.decode('utf-8')
 
 
-def build_report_json_data(trackableObject, base64ImageString):
+def build_block_event_json_data(trackableObject, base64ImageString):
     jsonData = {
         "isBlocked": trackableObject.isBlocking,
         "license_number": trackableObject.licenseNumber if trackableObject.licenseNumber else "null",
@@ -37,9 +42,16 @@ def build_report_json_data(trackableObject, base64ImageString):
     return jsonData
 
 
+def build_streaming_json_data(isStreaming, base64ImageString):
+    jsonData = {
+        "isStreaming": isStreaming,
+        "picture": base64ImageString
+    }
+
+    return jsonData
+
+
 def post_report(jsonData):
     json_string = json.dumps(jsonData)
     json_string = json_string.replace(" ", "")
     print(json_string)
-    # out = check_output(["./sendReport.sh", "hi"])
-    # print("[INFO] {}".format(out))

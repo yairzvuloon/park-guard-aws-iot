@@ -1,3 +1,4 @@
 node_modules/
 certs/
-scripts/park-guard-python/__pycache__/report_handler.cpython-36.pyc
+scripts/park-guard-python/pyimagesearch/__pycache__/*
+scripts/park-guard-python/__pycache__/*.pyc

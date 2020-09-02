@@ -8,6 +8,7 @@ const runCarTracker = () => {
   process.chdir("./scripts/park-guard-python");
   shell = PythonShell.run(
     "car_tracker.py",
+    // "streamer.py",
     {
       pythonOptions: ["-u"],
       mode: "text",
@@ -16,6 +17,8 @@ const runCarTracker = () => {
         "./config/config.json",
         "-l",
         "./config/lines_offset_config.json",
+        // "--stream",
+        // "true"
       ],
     },
     (err) => console.log("car_tracker.py failed", { err })

@@ -75,5 +75,5 @@
   //  white list json path
   "white_list_json": "config/white_list.json",
 
-  "streaming_frequency": 2
+  "streaming_frequency": 50
 }

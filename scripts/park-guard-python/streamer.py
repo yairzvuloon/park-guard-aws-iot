@@ -124,7 +124,7 @@ def initialize_video_stream():
         videoStream = cv2.VideoCapture(conf["video_source"])
     else:
         videoStream = VideoStream(usePiCamera=False).start()
-    time.sleep(2.0)
+    time.sleep(3.0)
     return videoStream
 
 
@@ -147,6 +147,9 @@ def run_program():
 
     # start the frames per second throughput estimator
     fps = FPS().start()
+
+    # continue stream flag
+    isContinueStream = True
 
     # loop over the frames of the stream
     while True:
@@ -184,12 +187,21 @@ def run_program():
         totalFrames += 1
         fps.update()
 
-        if not isStreaming:
+        # if current frame is a stream frame
+        # enable continue streaming
+        if totalFrames % conf["streaming_frequency"] == 0:
+            isContinueStream = True
+
+        # if continue streaming true
+        # print report to server
+        # disable continue streaming until next stream frame
+        if isContinueStream:
             handle_report(None, frame=currentFrame, isForStreaming=True, isStreaming=isStreaming)
+            isContinueStream = False
+
+        # if not streaming break after sending  one frame
+        if not isStreaming:
             break
-        else:
-            if totalFrames % conf["streaming_frequency"]:
-                handle_report(None, frame=currentFrame, isForStreaming=True, isStreaming=isStreaming)
 
     end_program(fps, videoStream)
 

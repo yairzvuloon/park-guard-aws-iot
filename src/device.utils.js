@@ -100,6 +100,11 @@ class DeviceUtil {
     this.handleStreamerState(false);
   }
 
+  restoreDefaultLinesOffsetConfig() {
+    const defaultConfig = { horizontal_offset: -50, left_vertical_offset: 0, right_vertical_offset: -30 }
+
+    fs.writeJsonSync(path.join(__dirname, '../scripts/park-guard-python/config/lines_offset_config.json'), defaultConfig);
+  }
 
   async main() {
     //this.handleRunTrackerState();

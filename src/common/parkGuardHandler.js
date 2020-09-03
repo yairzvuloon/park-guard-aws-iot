@@ -38,9 +38,9 @@ const runCarTracker = (scriptName, isStream) => {
 };
 
 const killRunningChildProcess = () => {
-  if (shell) {
+  if (shell && shell.childProcess) {
+    shell.childProcess.kill()
     process.chdir("../../")
-    shell.kill();
   }
 }
 

@@ -79,8 +79,7 @@ class DeviceUtil {
 
 
   async main() {
-
-
+    this.handleRunTrackerState();
   };
 
 }

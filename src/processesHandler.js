@@ -32,6 +32,8 @@ const runCarTracker = (scriptName, isStream) => {
     (err) => err && console.log("the process child failed", { err })
   );
 
+  process.chdir("../../")
+
   if (scriptName === scriptsNames.CAR_TRACKER)
     carTrackerProcess = shell;
 
@@ -45,7 +47,6 @@ const killCarTrackerChildProcess = () => {
   if (carTrackerProcess && carTrackerProcess.childProcess) {
     carTrackerProcess.childProcess.kill();
     carTrackerProcess = null;
-    process.chdir("../../")
   }
 }
 
@@ -53,7 +54,6 @@ const killStreamerChildProcess = () => {
   if (streamerProcess && streamerProcess.childProcess) {
     streamerProcess.childProcess.kill();
     streamerProcess = null;
-    process.chdir("../../")
   }
 }
 

@@ -30,11 +30,13 @@ class DeviceUtil {
 
     this._thingShadow.on("delta", (thingName, stateObject) => {
       this._stateDelta = stateObject.state;
-      const deltaKEy = Object.keys(this._stateDelta).pop();
+      const deltaKey = Object.keys(this._stateDelta).pop();
 
-      if (deltaKEy === 'whiteList') {
-        this.updateWhiteList(this._stateDelta[deltaKEy])
-      }
+      if (deltaKey === 'whiteList')
+        this.updateWhiteList(this._stateDelta[deltaKey])
+
+      else if (deltaKey === 'linesOffset')
+        this.updateLinesOffsetConfig(this._stateDelta[deltaKey])
 
     });
   }
@@ -50,7 +52,7 @@ class DeviceUtil {
   }
 
   handleRunTrackerState() {
-    killRunningChildProcess();
+    killStreamerChildProcess();
 
     runCarTracker(scriptsNames.CAR_TRACKER, false).on("message", (message) => {
       console.log(message);
@@ -59,7 +61,8 @@ class DeviceUtil {
   }
 
   handleStreamerState(isVideoStream) {
-    killRunningChildProcess();
+    killCarTrackerChildProcess();
+    killStreamerChildProcess();
 
     runCarTracker(scriptsNames.STREAMER, isVideoStream).on("message", (message) => {
       console.log(message);
@@ -69,6 +72,7 @@ class DeviceUtil {
 
   updateWhiteList(desiredWhiteList) {
     killCarTrackerChildProcess();
+    killStreamerChildProcess();
 
     const whiteListObj = { list: desiredWhiteList.map(licenseNumber => licenseNumber) }
 
@@ -79,6 +83,21 @@ class DeviceUtil {
         reported: this._stateDelta
       }
     });
+  }
+
+  updateLinesOffsetConfig(desiredLinesOffsetConfig) {
+    killCarTrackerChildProcess();
+
+    const currentConfig = fs.readJSONSync(path.join(__dirname, '../scripts/park-guard-python/config/lines_offset_config.json'));
+    fs.writeJsonSync(path.join(__dirname, '../scripts/park-guard-python/config/lines_offset_config.json'), { ...currentConfig, ...desiredLinesOffsetConfig });
+
+    this._thingShadow.update(this._thingName, {
+      state: {
+        reported: this._stateDelta
+      }
+    });
+
+    this.handleStreamerState(false);
   }
 
 

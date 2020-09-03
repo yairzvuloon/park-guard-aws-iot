@@ -4,6 +4,7 @@ from subprocess import check_output
 import base64
 import cv2
 from pprint import pprint
+from datetime import datetime
 import sys
 
 
@@ -13,7 +14,8 @@ def handle_report(trackableObject, frame, isForStreaming=False, isStreaming=Fals
     base64ImageString = encode_frame_to_base64(frame)
 
     if not isForStreaming:
-        jsonData = build_block_event_json_data(trackableObject, base64ImageString)
+        jsonData = build_block_event_json_data(
+            trackableObject, base64ImageString)
     else:
         jsonData = build_streaming_json_data(isStreaming, base64ImageString)
 
@@ -45,7 +47,8 @@ def build_block_event_json_data(trackableObject, base64ImageString):
 def build_streaming_json_data(isStreaming, base64ImageString):
     jsonData = {
         "isStreaming": isStreaming,
-        "picture": base64ImageString
+        "picture": base64ImageString,
+        "start_time": datetime.today().strftime('%Y-%m-%d-%H-%M-%S'),
     }
 
     return jsonData

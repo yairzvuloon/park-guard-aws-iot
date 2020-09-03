@@ -39,12 +39,16 @@ class DeviceUtil {
       this._stateDelta = stateObject.state;
       const deltaKey = Object.keys(this._stateDelta).pop();
 
+      const delta = this._stateDelta[deltaKey];
+
       if (deltaKey === 'whiteList')
-        this.updateWhiteList(this._stateDelta[deltaKey])
+        this.updateWhiteList(delta)
 
       else if (deltaKey === 'linesOffset')
-        this.updateLinesOffsetConfig(this._stateDelta[deltaKey])
+        this.updateLinesOffsetConfig(delta)
 
+      else if (deltaKey === 'liveStream')
+        this.handleLiveStreamDelta(delta)
     });
   }
 
@@ -111,6 +115,19 @@ class DeviceUtil {
     const defaultConfig = { horizontal_offset: -50, left_vertical_offset: 0, right_vertical_offset: -30 }
 
     fs.writeJsonSync(LINES_OFFSET_FILE, defaultConfig);
+  }
+
+  handleLiveStreamDelta(liveStreamDelta) {
+    if (liveStreamDelta)
+      this.handleStreamerState(liveStreamDelta)
+    else
+      killStreamerChildProcess();
+
+    this._thingShadow.update(this._thingName, {
+      state: {
+        reported: this._stateDelta
+      }
+    });
   }
 
   async main() {

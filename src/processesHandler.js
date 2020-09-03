@@ -2,7 +2,7 @@ const { PythonShell } = require("python-shell");
 
 let carTrackerProcess, streamerProcess, alarmProcess;
 
-const { scriptsNames } = require('./config/scriptsNames')
+const { scriptsNames } = require('./scriptsNames')
 
 const _getCarTrackerArgs = (scriptName, isStream) => {
   const requiredArgs = [

@@ -1,10 +1,15 @@
-const { thingShadow, device } = require("aws-iot-device-sdk");
-const { runCarTracker, killCarTrackerChildProcess, killStreamerChildProcess } = require('./processesHandler');
 const path = require("path");
 const fs = require("fs-extra");
 const getCertData = require("./config/certs.util");
-const { scriptsNames } = require('./config/scriptsNames')
+const { scriptsNames } = require('./scriptsNames')
+const { thingShadow } = require("aws-iot-device-sdk");
+const { runCarTracker, killCarTrackerChildProcess, killStreamerChildProcess } = require('./processesHandler');
 
+const CONFIG_FOLDER = path.join(__dirname, '../scripts/park-guard-python/config');
+const configNamespace = name => path.join(CONFIG_FOLDER, name);
+
+const LINES_OFFSET_FILE = configNamespace('lines_offset_config.json');
+const WHITE_LIST_FILE = configNamespace('white_list.json');
 
 //you need to create certs folder in the project root
 //and keep your aws keys in
@@ -24,7 +29,9 @@ class DeviceUtil {
     this._thingShadow.on(
       "status",
       (thingName, statusType, clientToken, stateObject) => {
-        const deviceStateDelta = stateObject.state;
+        const deviceState = stateObject.state;
+
+        console.log(`Current shadow state status: ${deviceState}`)
       }
     );
 
@@ -76,7 +83,7 @@ class DeviceUtil {
 
     const whiteListObj = { list: desiredWhiteList.map(licenseNumber => licenseNumber) }
 
-    fs.writeJsonSync(path.join(__dirname, '../scripts/park-guard-python/config/white_list.json'), whiteListObj);
+    fs.writeJsonSync(WHITE_LIST_FILE, whiteListObj);
 
     this._thingShadow.update(this._thingName, {
       state: {
@@ -88,8 +95,8 @@ class DeviceUtil {
   updateLinesOffsetConfig(desiredLinesOffsetConfig) {
     killCarTrackerChildProcess();
 
-    const currentConfig = fs.readJSONSync(path.join(__dirname, '../scripts/park-guard-python/config/lines_offset_config.json'));
-    fs.writeJsonSync(path.join(__dirname, '../scripts/park-guard-python/config/lines_offset_config.json'), { ...currentConfig, ...desiredLinesOffsetConfig });
+    const currentConfig = fs.readJSONSync(LINES_OFFSET_FILE);
+    fs.writeJsonSync(LINES_OFFSET_FILE, { ...currentConfig, ...desiredLinesOffsetConfig });
 
     this._thingShadow.update(this._thingName, {
       state: {
@@ -103,11 +110,10 @@ class DeviceUtil {
   restoreDefaultLinesOffsetConfig() {
     const defaultConfig = { horizontal_offset: -50, left_vertical_offset: 0, right_vertical_offset: -30 }
 
-    fs.writeJsonSync(path.join(__dirname, '../scripts/park-guard-python/config/lines_offset_config.json'), defaultConfig);
+    fs.writeJsonSync(LINES_OFFSET_FILE, defaultConfig);
   }
 
   async main() {
-    //this.handleRunTrackerState();
   };
 
 }

@@ -19,6 +19,7 @@
   "dependencies": {
     "aws-iot-device-sdk": "^2.2.6",
     "aws-sdk": "^2.734.0",
+    "fs-extra": "^9.0.1",
     "python-shell": "^2.0.1"
   }
 }

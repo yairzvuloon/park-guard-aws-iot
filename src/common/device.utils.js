@@ -1,25 +1,23 @@
 const { thingShadow, device } = require("aws-iot-device-sdk");
-const { S3 } = require("aws-sdk");
+const { runCarTracker, killRunningChildProcess } = require('./parkGuardHandler');
 const path = require("path");
-const fs = require("fs/promises");
-const getCertData = require("./certs.util");
+const fs = require("fs-extra");
+const getCertData = require("../config/certs.util");
+const { scriptsNames } = require('../config/scriptsNames')
+
 
 //you need to create certs folder in the project root
 //and keep your aws keys in
 class DeviceUtil {
   constructor({ thingName, clientId, host }) {
     this._thingName = thingName;
-    this._device = device({
-      ...getCertData(),
-      clientId,
-      host,
-    });
-
     this._thingShadow = thingShadow({
       ...getCertData(),
       clientId,
       host,
     });
+
+
 
     this._thingShadow.register(this._thingName, { persistentSubscribe: true });
 
@@ -28,39 +26,19 @@ class DeviceUtil {
     this._thingShadow.on(
       "status",
       (thingName, statusType, clientToken, stateObject) => {
-        const deviceControlState = stateObject.state.desired;
+        const deviceStateDelta = stateObject.state;
       }
     );
 
     this._thingShadow.on("delta", (thingName, stateObject) => {
-      const deviceControlState = stateObject.state.desired;
+      const stateDelta = stateObject.state;
+      const deltaKEy = Object.keys(stateDelta).pop();
+
+      if (deltaKEy === 'whiteList') {
+        this.updateWhiteList(stateDelta[deltaKEy])
+      }
+
     });
-
-    this._thingShadow.on("connect", () => {
-      console.log("connect");
-      setTimeout(() => {
-        const clientToken = this._thingShadow.get(this._thingName);
-        if (clientToken) console.log("shadow connected");
-      }, 3000);
-    });
-
-    // this._device.publish(
-    //   `$aws/things/${thingName}/shadow/update`,
-    //   JSON.stringify({
-    //     state: {
-    //       reported: {
-    //         isAllowed: true,
-    //       },
-    //     },
-    //   }),
-    //   (err, granted) => {
-    //     if (err) console.error(err);
-    //   }
-    // );
-
-    // this._device.on("message", (topic, payload) =>
-    //   console.log("message", topic, payload.toString())
-    // );
   }
 
   sendReport(report) {
@@ -72,6 +50,39 @@ class DeviceUtil {
 
     console.log("DeviceUtil: sendReport succeeded");
   }
+
+  handleRunTrackerState() {
+    killRunningChildProcess();
+
+    runCarTracker(scriptsNames.CAR_TRACKER, false).on("message", (message) => {
+      console.log(message);
+      message.includes("[INFO]") ? null : this.sendReport(message);
+    });
+  }
+
+  handleStreamerState(isVideoStream) {
+    killRunningChildProcess();
+
+    runCarTracker(scriptsNames.STREAMER, isVideoStream).on("message", (message) => {
+      console.log(message);
+      message.includes("[INFO]") ? null : this.sendReport(message);
+    });
+  }
+
+  updateWhiteList(desiredWhiteList) {
+    killRunningChildProcess();
+
+    const whiteListObj = { list: desiredWhiteList.map(licenseNumber => licenseNumber) }
+
+    fs.writeJsonSync(path.join(__dirname, '../../scripts/park-guard-python/config/white_list.json'), whiteListObj);
+  }
+
+
+  async main() {
+
+
+  };
+
 }
 
 module.exports = {

@@ -1,9 +1,9 @@
 const { thingShadow, device } = require("aws-iot-device-sdk");
-const { runCarTracker, killRunningChildProcess } = require('./parkGuardHandler');
+const { runCarTracker, killCarTrackerChildProcess, killStreamerChildProcess } = require('./processesHandler');
 const path = require("path");
 const fs = require("fs-extra");
-const getCertData = require("../config/certs.util");
-const { scriptsNames } = require('../config/scriptsNames')
+const getCertData = require("./config/certs.util");
+const { scriptsNames } = require('./config/scriptsNames')
 
 
 //you need to create certs folder in the project root
@@ -68,11 +68,11 @@ class DeviceUtil {
   }
 
   updateWhiteList(desiredWhiteList) {
-    killRunningChildProcess();
+    killCarTrackerChildProcess();
 
     const whiteListObj = { list: desiredWhiteList.map(licenseNumber => licenseNumber) }
 
-    fs.writeJsonSync(path.join(__dirname, '../../scripts/park-guard-python/config/white_list.json'), whiteListObj);
+    fs.writeJsonSync(path.join(__dirname, '../scripts/park-guard-python/config/white_list.json'), whiteListObj);
 
     this._thingShadow.update(this._thingName, {
       state: {

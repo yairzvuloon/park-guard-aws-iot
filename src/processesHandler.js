@@ -1,8 +1,8 @@
 const { PythonShell } = require("python-shell");
 
-let shell;
+let carTrackerProcess, streamerProcess, alarmProcess;
 
-const { scriptsNames } = require('../config/scriptsNames')
+const { scriptsNames } = require('./config/scriptsNames')
 
 const _getCarTrackerArgs = (scriptName, isStream) => {
   const requiredArgs = [
@@ -16,15 +16,13 @@ const _getCarTrackerArgs = (scriptName, isStream) => {
 
   if (scriptName == scriptsNames.STREAMER)
     return [...requiredArgs, "--stream", `${isStream}`]
-
-
 }
 
 const runCarTracker = (scriptName, isStream) => {
   process.cwd();
   process.chdir("./scripts/park-guard-python");
 
-  shell = PythonShell.run(
+  const shell = PythonShell.run(
     scriptName,
     {
       pythonOptions: ["-u"],
@@ -34,17 +32,33 @@ const runCarTracker = (scriptName, isStream) => {
     (err) => err && console.log("the process child failed", { err })
   );
 
-  return shell;
+  if (scriptName === scriptsNames.CAR_TRACKER)
+    carTrackerProcess = shell;
+
+  else if (scriptName === scriptsNames.STREAMER)
+    streamerProcess = shell
+
+  return shell
 };
 
-const killRunningChildProcess = () => {
-  if (shell && shell.childProcess) {
-    shell.childProcess.kill()
+const killCarTrackerChildProcess = () => {
+  if (carTrackerProcess && carTrackerProcess.childProcess) {
+    carTrackerProcess.childProcess.kill();
+    carTrackerProcess = null;
+    process.chdir("../../")
+  }
+}
+
+const killStreamerChildProcess = () => {
+  if (streamerProcess && streamerProcess.childProcess) {
+    streamerProcess.childProcess.kill();
+    streamerProcess = null;
     process.chdir("../../")
   }
 }
 
 module.exports = {
   runCarTracker,
-  killRunningChildProcess
+  killCarTrackerChildProcess,
+  killStreamerChildProcess,
 } 

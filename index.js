@@ -1,4 +1,4 @@
-const { DeviceUtil } = require("./src/common/device.utils");
+const { DeviceUtil } = require("./src/device.utils");
 
 const main = async () => {
   const thingName = "ParkGuard1";

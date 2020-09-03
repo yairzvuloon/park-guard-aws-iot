@@ -118,6 +118,8 @@ class DeviceUtil {
   }
 
   handleLiveStreamDelta(liveStreamDelta) {
+    killCarTrackerChildProcess();
+
     if (liveStreamDelta)
       this.handleStreamerState(liveStreamDelta)
     else

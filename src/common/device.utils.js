@@ -17,8 +17,6 @@ class DeviceUtil {
       host,
     });
 
-
-
     this._thingShadow.register(this._thingName, { persistentSubscribe: true });
 
     this._reportsTopic = `${thingName}/reports`;
@@ -31,11 +29,11 @@ class DeviceUtil {
     );
 
     this._thingShadow.on("delta", (thingName, stateObject) => {
-      const stateDelta = stateObject.state;
-      const deltaKEy = Object.keys(stateDelta).pop();
+      this._stateDelta = stateObject.state;
+      const deltaKEy = Object.keys(this._stateDelta).pop();
 
       if (deltaKEy === 'whiteList') {
-        this.updateWhiteList(stateDelta[deltaKEy])
+        this.updateWhiteList(this._stateDelta[deltaKEy])
       }
 
     });
@@ -75,11 +73,17 @@ class DeviceUtil {
     const whiteListObj = { list: desiredWhiteList.map(licenseNumber => licenseNumber) }
 
     fs.writeJsonSync(path.join(__dirname, '../../scripts/park-guard-python/config/white_list.json'), whiteListObj);
+
+    this._thingShadow.update(this._thingName, {
+      state: {
+        reported: this._stateDelta
+      }
+    });
   }
 
 
   async main() {
-    this.handleRunTrackerState();
+    //this.handleRunTrackerState();
   };
 
 }

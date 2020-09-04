@@ -101,8 +101,13 @@ class DeviceUtil {
     killCarTrackerChildProcess();
 
     const currentConfig = fs.readJSONSync(LINES_OFFSET_FILE);
-    fs.writeJsonSync(LINES_OFFSET_FILE, { ...currentConfig, ...desiredLinesOffsetConfig });
+
+    const updatedConfig = { ...currentConfig, ...desiredLinesOffsetConfig };
+
+    fs.writeJsonSync(LINES_OFFSET_FILE, updatedConfig);
+
     this.updateReportedShadowState();
+
     this.handleStreamerState(false);
   }
 

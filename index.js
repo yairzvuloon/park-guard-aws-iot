@@ -1,3 +1,4 @@
+// for debugging
 const { DeviceUtil } = require("./src/device.utils");
 
 const main = async () => {

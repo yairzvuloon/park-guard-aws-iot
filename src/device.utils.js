@@ -45,23 +45,99 @@ class DeviceUtil {
       this._stateDelta = stateObject.state;
       const deltaKey = Object.keys(this._stateDelta).pop();
 
-      const delta = this._stateDelta[deltaKey];
-
-      if (deltaKey === 'whiteList')
-        this.updateWhiteList(delta);
-
-      else if (deltaKey === 'linesOffset')
-        this.updateLinesOffsetConfig(delta);
-
-      else if (deltaKey === 'liveStream')
-        this.handleLiveStreamDelta(delta);
-
-      else if (deltaKey === 'carTracker')
-        this.handleCarTrackerDelta(delta);
-
-      else if (deltaKey === 'alarm')
-        this.handleAlarmDelta(delta);
+      handleDelta(deltaKey);
     });
+  }
+
+  handleDelta(deltaKey) {
+    const delta = this._stateDelta[deltaKey];
+
+    if (deltaKey === 'carTracker')
+      this.handleCarTrackerDelta(delta);
+
+    else if (deltaKey === 'liveStream')
+      this.handleLiveStreamDelta(delta);
+
+    else if (deltaKey === 'whiteList')
+      this.handleWhiteListDelta(delta);
+
+    else if (deltaKey === 'linesOffset')
+      this.handleLinesOffsetDelta(delta);
+
+    else if (deltaKey === 'alarm')
+      this.handleAlarmDelta(delta);
+  }
+
+  handleCarTrackerDelta(carTrackerDelta) {
+    if (carTrackerDelta)
+      this.handleRunTrackerState()
+    else
+      killCarTrackerChildProcess();
+
+    this.updateReportedShadowState();
+  }
+
+  handleLiveStreamDelta(liveStreamDelta) {
+    if (liveStreamDelta)
+      this.handleStreamerState(liveStreamDelta)
+    else
+      killStreamerChildProcess();
+
+    this.updateReportedShadowState();
+  }
+
+  handleWhiteListDelta(desiredWhiteList) {
+    killCarTrackerChildProcess();
+    killStreamerChildProcess();
+
+    const whiteListObj = { list: desiredWhiteList.map(licenseNumber => licenseNumber) }
+
+    fs.writeJsonSync(WHITE_LIST_FILE, whiteListObj);
+
+    this.updateReportedShadowState();
+  }
+
+  handleLinesOffsetDelta(desiredLinesOffsetConfig) {
+    killCarTrackerChildProcess();
+
+    const currentConfig = fs.readJSONSync(LINES_OFFSET_FILE);
+    fs.writeJsonSync(LINES_OFFSET_FILE, { ...currentConfig, ...desiredLinesOffsetConfig });
+    this.updateReportedShadowState();
+    this.handleStreamerState(false);
+  }
+
+  handleAlarmDelta(alarmDelta) {
+    if (alarmDelta)
+      this.handleAlarmState()
+    else
+      killAlarmChildProcess();
+
+    this.updateReportedShadowState();
+  }
+
+  handleRunTrackerState() {
+    killStreamerChildProcess();
+    killCarTrackerChildProcess();
+
+    runCarTracker(scriptsNames.CAR_TRACKER, false).on("message", (message) => {
+      console.log(message);
+      message.includes("[INFO]") ? null : this.sendReport(message);
+    });
+  }
+
+  handleStreamerState(isVideoStream) {
+    killCarTrackerChildProcess();
+    killStreamerChildProcess();
+
+    runCarTracker(scriptsNames.STREAMER, isVideoStream).on("message", (message) => {
+      console.log(message);
+      message.includes("[INFO]") ? null : this.sendReport(message);
+    });
+  }
+
+  handleAlarmState() {
+    killAlarmChildProcess();
+    runAlarm().on("message", (message) => console.log(message));
   }
 
   sendReport(report) {
@@ -74,113 +150,19 @@ class DeviceUtil {
     console.log("DeviceUtil: sendReport succeeded");
   }
 
-
-  handleRunTrackerState() {
-    killStreamerChildProcess();
-    killCarTrackerChildProcess();
-
-    runCarTracker(scriptsNames.CAR_TRACKER, false).on("message", (message) => {
-      console.log(message);
-      message.includes("[INFO]") ? null : this.sendReport(message);
-    });
-  }
-
-  handleAlarmState() {
-    killAlarmChildProcess();
-    runAlarm().on("message", (message) => console.log(message));
-  }
-
-
-  handleStreamerState(isVideoStream) {
-    killCarTrackerChildProcess();
-    killStreamerChildProcess();
-
-    runCarTracker(scriptsNames.STREAMER, isVideoStream).on("message", (message) => {
-      console.log(message);
-      message.includes("[INFO]") ? null : this.sendReport(message);
-    });
-  }
-
-  updateWhiteList(desiredWhiteList) {
-    killCarTrackerChildProcess();
-    killStreamerChildProcess();
-
-    const whiteListObj = { list: desiredWhiteList.map(licenseNumber => licenseNumber) }
-
-    fs.writeJsonSync(WHITE_LIST_FILE, whiteListObj);
-
-    this._thingShadow.update(this._thingName, {
-      state: {
-        reported: this._stateDelta
-      }
-    });
-  }
-
-  updateLinesOffsetConfig(desiredLinesOffsetConfig) {
-    killCarTrackerChildProcess();
-
-    const currentConfig = fs.readJSONSync(LINES_OFFSET_FILE);
-    fs.writeJsonSync(LINES_OFFSET_FILE, { ...currentConfig, ...desiredLinesOffsetConfig });
-
-    this._thingShadow.update(this._thingName, {
-      state: {
-        reported: this._stateDelta
-      }
-    });
-
-    this.handleStreamerState(false);
-  }
-
   restoreDefaultLinesOffsetConfig() {
     const defaultConfig = { horizontal_offset: -50, left_vertical_offset: 0, right_vertical_offset: -30 }
 
     fs.writeJsonSync(LINES_OFFSET_FILE, defaultConfig);
   }
 
-  handleLiveStreamDelta(liveStreamDelta) {
-    if (liveStreamDelta)
-      this.handleStreamerState(liveStreamDelta)
-    else
-      killStreamerChildProcess();
-
+  updateReportedShadowState() {
     this._thingShadow.update(this._thingName, {
       state: {
         reported: this._stateDelta
       }
     });
   }
-
-  handleCarTrackerDelta(carTrackerDelta) {
-    if (carTrackerDelta)
-      this.handleRunTrackerState()
-    else
-      killCarTrackerChildProcess();
-
-    this._thingShadow.update(this._thingName, {
-      state: {
-        reported: this._stateDelta
-      }
-    });
-  }
-
-  handleAlarmDelta(alarmDelta) {
-    if (alarmDelta)
-      this.handleAlarmState()
-    else
-      killAlarmChildProcess();
-
-    this._thingShadow.update(this._thingName, {
-      state: {
-        reported: this._stateDelta
-      }
-    });
-  }
-
-  async main() {
-    //runCarTracker(scriptsNames.STREAMER, true)
-    //runAlarm()
-  };
-
 }
 
 module.exports = {

@@ -2,7 +2,7 @@ const { PythonShell } = require("python-shell");
 
 let carTrackerProcess, streamerProcess, alarmProcess;
 
-const { scriptsNames } = require('./scriptsNames')
+const { scriptsNames } = require('./scriptsNames');
 
 const _getCarTrackerArgs = (scriptName, isStream) => {
   const requiredArgs = [
@@ -40,8 +40,29 @@ const runCarTracker = (scriptName, isStream) => {
   else if (scriptName === scriptsNames.STREAMER)
     streamerProcess = shell
 
-  return shell
+  return shell;
 };
+
+const runAlarm = () => {
+  process.cwd();
+  process.chdir("./scripts/park-guard-python");
+
+  const shell = PythonShell.run(
+    scriptsNames.ALARM,
+    {
+      pythonOptions: ["-u"],
+      mode: "text",
+      args: []
+    },
+    (err) => err && console.log("the process child failed", { err })
+  );
+
+  process.chdir("../../")
+
+  alarmProcess = shell;
+
+  return shell;
+}
 
 const killCarTrackerChildProcess = () => {
   if (carTrackerProcess && carTrackerProcess.childProcess) {
@@ -57,8 +78,17 @@ const killStreamerChildProcess = () => {
   }
 }
 
+const killAlarmChildProcess = () => {
+  if (alarmProcess && alarmProcess.childProcess) {
+    alarmProcess.childProcess.kill();
+    alarmProcess = null;
+  }
+}
+
 module.exports = {
   runCarTracker,
+  runAlarm,
   killCarTrackerChildProcess,
   killStreamerChildProcess,
+  killAlarmChildProcess,
 } 

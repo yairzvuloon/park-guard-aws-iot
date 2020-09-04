@@ -3,7 +3,13 @@ const fs = require("fs-extra");
 const getCertData = require("./config/certs.util");
 const { scriptsNames } = require('./scriptsNames')
 const { thingShadow } = require("aws-iot-device-sdk");
-const { runCarTracker, killCarTrackerChildProcess, killStreamerChildProcess } = require('./processesHandler');
+const {
+  runCarTracker,
+  killCarTrackerChildProcess,
+  killStreamerChildProcess,
+  runAlarm,
+  killAlarmChildProcess
+} = require('./processesHandler');
 
 const CONFIG_FOLDER = path.join(__dirname, '../scripts/park-guard-python/config');
 const configNamespace = name => path.join(CONFIG_FOLDER, name);
@@ -31,7 +37,7 @@ class DeviceUtil {
       (thingName, statusType, clientToken, stateObject) => {
         const deviceState = stateObject.state;
 
-        console.log(`Current shadow state status: ${deviceState}`)
+        console.log(`Current shadow state status: ${JSON.stringify(deviceState)}`)
       }
     );
 
@@ -42,13 +48,19 @@ class DeviceUtil {
       const delta = this._stateDelta[deltaKey];
 
       if (deltaKey === 'whiteList')
-        this.updateWhiteList(delta)
+        this.updateWhiteList(delta);
 
       else if (deltaKey === 'linesOffset')
-        this.updateLinesOffsetConfig(delta)
+        this.updateLinesOffsetConfig(delta);
 
       else if (deltaKey === 'liveStream')
-        this.handleLiveStreamDelta(delta)
+        this.handleLiveStreamDelta(delta);
+
+      else if (deltaKey === 'carTracker')
+        this.handleCarTrackerDelta(delta);
+
+      else if (deltaKey === 'alarm')
+        this.handleAlarmDelta(delta);
     });
   }
 
@@ -62,14 +74,22 @@ class DeviceUtil {
     console.log("DeviceUtil: sendReport succeeded");
   }
 
+
   handleRunTrackerState() {
     killStreamerChildProcess();
+    killCarTrackerChildProcess();
 
     runCarTracker(scriptsNames.CAR_TRACKER, false).on("message", (message) => {
       console.log(message);
       message.includes("[INFO]") ? null : this.sendReport(message);
     });
   }
+
+  handleAlarmState() {
+    killAlarmChildProcess();
+    runAlarm().on("message", (message) => console.log(message));
+  }
+
 
   handleStreamerState(isVideoStream) {
     killCarTrackerChildProcess();
@@ -118,8 +138,6 @@ class DeviceUtil {
   }
 
   handleLiveStreamDelta(liveStreamDelta) {
-    killCarTrackerChildProcess();
-
     if (liveStreamDelta)
       this.handleStreamerState(liveStreamDelta)
     else
@@ -132,7 +150,35 @@ class DeviceUtil {
     });
   }
 
+  handleCarTrackerDelta(carTrackerDelta) {
+    if (carTrackerDelta)
+      this.handleRunTrackerState()
+    else
+      killCarTrackerChildProcess();
+
+    this._thingShadow.update(this._thingName, {
+      state: {
+        reported: this._stateDelta
+      }
+    });
+  }
+
+  handleAlarmDelta(alarmDelta) {
+    if (alarmDelta)
+      this.handleAlarmState()
+    else
+      killAlarmChildProcess();
+
+    this._thingShadow.update(this._thingName, {
+      state: {
+        reported: this._stateDelta
+      }
+    });
+  }
+
   async main() {
+    //runCarTracker(scriptsNames.STREAMER, true)
+    //runAlarm()
   };
 
 }

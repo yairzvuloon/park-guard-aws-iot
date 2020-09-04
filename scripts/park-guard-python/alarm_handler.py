@@ -11,7 +11,7 @@ def get_alarm_sound():
 class AlarmHandler:
     def __init__(self, src=0):
         self.stopped = False
-        self.src = src  # get_alarm_sound() if src == 0 else src
+        self.src = get_alarm_sound() if src == 0 else src
         self.objectID = None
 
     def start(self, objectID=None):

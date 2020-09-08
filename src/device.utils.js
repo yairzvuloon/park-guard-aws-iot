@@ -45,7 +45,7 @@ class DeviceUtil {
       this._stateDelta = stateObject.state;
       const deltaKey = Object.keys(this._stateDelta).pop();
 
-      handleDelta(deltaKey);
+      this.handleDelta(deltaKey);
     });
   }
 
@@ -66,6 +66,9 @@ class DeviceUtil {
 
     else if (deltaKey === 'alarm')
       this.handleAlarmDelta(delta);
+
+    else if (deltaKey === 'frame')
+      this.handleFrameDelta(delta);
   }
 
   handleCarTrackerDelta(carTrackerDelta) {
@@ -118,6 +121,20 @@ class DeviceUtil {
       killAlarmChildProcess();
 
     this.updateReportedShadowState();
+  }
+
+  handleFrameDelta(frameDelta) {
+    if (frameDelta)
+      this.handleStreamerState(false);
+    else
+      killStreamerChildProcess();
+
+    this._thingShadow.update(this._thingName, {
+      state: {
+        desired: { frame: false },
+        reported: { frame: false }
+      }
+    });
   }
 
   handleRunTrackerState() {

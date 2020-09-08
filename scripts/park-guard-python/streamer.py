@@ -41,12 +41,12 @@ def get_frame_from_video_stream(videoStream):
 
 def calculate_zone_boundaries(H, W, lines_offset_conf):
     LeftToRightLine = W // conf["left_to_right_line"] + \
-                      lines_offset_conf["left_vertical_offset"]
+        lines_offset_conf["left_vertical_offset"]
     RightToLeftLine = W - \
-                      W // conf["left_to_right_line"] + \
-                      lines_offset_conf["right_vertical_offset"]
+        W // conf["left_to_right_line"] + \
+        lines_offset_conf["right_vertical_offset"]
     HorizontalLine = H // conf["horizontal_line"] + \
-                     lines_offset_conf["horizontal_offset"]
+        lines_offset_conf["horizontal_offset"]
 
     return LeftToRightLine, RightToLeftLine, HorizontalLine
 
@@ -124,7 +124,7 @@ def initialize_video_stream():
         videoStream = cv2.VideoCapture(conf["video_source"])
     else:
         videoStream = VideoStream(usePiCamera=False).start()
-    time.sleep(3.0)
+    time.sleep(1.0)
     return videoStream
 
 
@@ -196,7 +196,8 @@ def run_program():
         # print report to server
         # disable continue streaming until next stream frame
         if isContinueStream:
-            handle_report(None, frame=currentFrame, isForStreaming=True, isStreaming=isStreaming)
+            handle_report(None, frame=currentFrame,
+                          isForStreaming=True, isStreaming=isStreaming)
             isContinueStream = False
 
         # if not streaming break after sending  one frame

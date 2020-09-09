@@ -1,5 +1,7 @@
 const path = require("path");
-const thing = "parkguard1";
+const thingConfig = require("../../thing-config.json");
+const thing = thingConfig.thing.toLowerCase();
+
 const awsIotKeysPath = path.resolve(`certs/${thing}`);
 
 const privateKey = `${thing}-private.pem.key`;

@@ -90,7 +90,6 @@ class DeviceUtil {
   }
 
   handleWhiteListDelta(desiredWhiteList) {
-    killCarTrackerChildProcess();
     killStreamerChildProcess();
 
     const whiteListObj = { list: desiredWhiteList.map(licenseNumber => licenseNumber) }

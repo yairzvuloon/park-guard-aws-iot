@@ -30,7 +30,7 @@
   // flag used to check if plate recodniser is to be used and plate recogniser access
   // token
   "use__plate_recogniser": true,
-  "plate_recogniser_token": "c3d2f17525534db96299d25bd0d1ea1a6b84b2dd",
+  "plate_recogniser_token": "bef99c9fea1e80008260b369966b75c8bbdfeec6",
   "plate_regions": [
     "il"
   ],
